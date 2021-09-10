@@ -1,9 +1,0 @@
-streamlit
-pandas
-numpy
-plotly
-datetime
-gspread_pandas
-google.oauth2
-ssl
-

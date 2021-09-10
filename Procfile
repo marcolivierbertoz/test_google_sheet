@@ -1,1 +1,1 @@
-web: sh setup.sh && streamlit run XXX.py
+web: sh setup.sh && streamlit run Counter_Building_Tools.py

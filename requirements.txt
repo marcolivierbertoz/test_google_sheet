@@ -8,3 +8,4 @@ google-auth-oauthlib == 0.4.2
 google-pasta == 0.2.0
 libprotobuf == 3.13.0.1
 protobuf == 3.13.0.1
+ssl

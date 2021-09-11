@@ -18,8 +18,8 @@ from google.oauth2 import service_account
 
 
 # Disable certificate verification 
-import ssl
-ssl._create_default_https_context = ssl._create_unverified_context
+# import ssl
+# ssl._create_default_https_context = ssl._create_unverified_context
 
 # Create Google Authentication connection object ##################################3
 scope = ['https://spreadsheets.google.com/feeds',
@@ -61,6 +61,8 @@ def update_the_spreadsheet(spreadsheetname,dataframe):
 
 
 # Loading data
+# @st.cache(ttl=600)
+# @st.cache(allow_output_mutation=True)
 def load_data():
     # Checking if google sheets exist
     # what_sheets = worksheet_names()
@@ -85,8 +87,17 @@ def compute_new_stock(df,object,qta_entry,qta_exit):
 # Get today date
 now = date.today().strftime("%d/%m/%Y")
 
-# Retrive the dataframe
+sidebar = st.sidebar
+
+# Button for reloading the data
+# button_reload = sidebar.button('Refresh data')
+
+# if button_reload:
+    # Retrive the dataframe
+
 df = load_data()
+    
+
 
 # Creating columns
 left_column1, right_column1 = st.columns(2)
@@ -102,7 +113,6 @@ right_column1.plotly_chart(all_stocks)
 
 # Sidebar option #######################################################################################
 
-sidebar = st.sidebar
 sidebar.title('Operazioni')
 operazioni = sidebar.radio('Selezionare Operazione',('Aggiungere Nuovo Stock','Modificare Stock','Controllo Ulteriori Grafici'))
 
@@ -124,15 +134,15 @@ if operazioni == 'Aggiungere Nuovo Stock':
             'Data': [now]
         }
         opt_df = pd.DataFrame(opt)
-        df1 = load_data()
-        new_df = df1.append(opt_df, ignore_index=True)
+        # df1 = load_data()
+        new_df = df.append(opt_df, ignore_index=True)
         update_the_spreadsheet('Foglio1', new_df)
     ############################
 elif operazioni == 'Modificare Stock':
     sidebar.header('Informazioni')
     sidebar.write('Qui di seguito è possibile modificare lo stock presente di un determinato oggetto')
     # Loading the df
-    df2 = load_data()
+    # df2 = load_data()
 
     # Modificare Stock #################
     Object_Edit = sidebar.selectbox('Selezionare Oggetto', sorted(df['Oggetto'].unique()))
@@ -146,7 +156,7 @@ elif operazioni == 'Modificare Stock':
     if button_edit:
         
         # Get last stock and compute new one
-        Qta_Stock_Add = compute_new_stock(df2,Object_Edit,Qta_Entrata,Qta_Uscita)
+        Qta_Stock_Add = compute_new_stock(df,Object_Edit,Qta_Entrata,Qta_Uscita)
 
 
         opt = {
@@ -157,7 +167,7 @@ elif operazioni == 'Modificare Stock':
             'Data': [now]
         }
         opt_df = pd.DataFrame(opt)
-        new_df = df2.append(opt_df, ignore_index=True)
+        new_df = df.append(opt_df, ignore_index=True)
         update_the_spreadsheet('Foglio1', new_df)
     # Qta_Stock_Add = sidebar.number_input('Quantità', min_value= 1, max_value= 100000,step=1)
     ###################################3
@@ -165,12 +175,12 @@ elif operazioni == 'Controllo Ulteriori Grafici':
     sidebar.header('Informazioni')
     sidebar.write('Qui di seguito è possibile visualizzare i grafici per il singolo oggetto')
     # Load data
-    df3 = load_data()
+    # df3 = load_data()
     
     # Second plot, stock and operaiton throught time of single object
     left_column2, right_column2 = st.columns(2)
     
-    Object_Plot = sidebar.selectbox('Selezionare Oggetto', sorted(df3['Oggetto'].unique()))
+    Object_Plot = sidebar.selectbox('Selezionare Oggetto', sorted(df['Oggetto'].unique()))
 
     left_column2.header('Andamento Stock oggetto: ' + Object_Plot)
     
@@ -178,7 +188,7 @@ elif operazioni == 'Controllo Ulteriori Grafici':
 
     button_view = sidebar.button('Visualizza', key=3)
     if button_view:
-        object_data = df3[df3['Oggetto'] == Object_Plot]
+        object_data = df[df['Oggetto'] == Object_Plot]
         # Left plot
         plot_single_object = px.line(object_data, x='Data', y='Totale_Stock')
         left_column2.plotly_chart(plot_single_object)
